@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Planner – Notes</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #fffaf0;
+      color: #4b3b00;
+      display: flex;
+    }
+
+    /* Journal-style sidebar tabs */
+    #plannerSidebar {
+      width: 120px;
+      background: #fff8dc;
+      border-right: 2px solid #b68634;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+    }
+
+    #plannerSidebar .tab {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      margin: 10px 0;
+      padding: 10px 5px;
+      background-color: #fef3cf;
+      border: 2px solid #d4af37;
+      border-radius: 12px;
+      font-weight: bold;
+      color: #4b3b00;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .tab:hover {
+      background-color: #d4af37;
+      color: white;
+    }
+
+    .tab.active {
+      background-color: #b68634;
+      color: white;
+      pointer-events: none;
+    }
+
+    .teddy-logo {
+      width: 32px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    /* Main content */
+    .mainContent {
+      flex: 1;
+      padding: 20px;
+    }
+
+    #tools {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .tool-btn {
+      background-color: #fef3cf;
+      border: 2px solid #b68634;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tool-btn.active {
+      background-color: #d4af37;
+      color: white;
+    }
+
+    #stickerPanel {
+      margin-bottom: 15px;
+      background: #fdf6e3;
+      padding: 12px;
+      border: 2px solid #d4af37;
+      border-radius: 10px;
+      max-width: 400px;
+    }
+
+    #stickerPages {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .sticker-item {
+      font-size: 24px;
+      padding: 6px;
+      background: #fff8dc;
+      border-radius: 8px;
+      cursor: grab;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+
+    #stickerCanvas {
+      position: relative;
+      height: 250px;
+      border: 2px dashed #b68634;
+      background: #fffef2;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .draggable-sticker {
+      position: absolute;
+      font-size: 24px;
+      cursor: move;
+      user-select: none;
+    }
+
+    .note-section {
+      background: #fffef5;
+      border: 2px solid #d4af37;
+      border-radius: 12px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .note-section h3 {
+      margin-top: 0;
+    }
+
+    #noteArea {
+      width: 100%;
+      height: 250px;
+      border: none;
+      background: repeating-linear-gradient(
+        #fffdf5,
+        #fffdf5 28px,
+        #fceabb 29px
+      );
+      padding: 10px;
+      font-size: 14px;
+      line-height: 30px;
+      resize: none;
+      outline: none;
+      color: #4b3b00;
+    }
+
+    #pageControls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    #trashBin {
+      font-size: 24px;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ffcce6;
+      border: 2px solid #ff99cc;
+      border-radius: 16px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 3px 3px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="plannerSidebar">
+    <a href="daily.html" class="tab">Daily</a>
+    <a href="weekly.html" class="tab">Weekly</a>
+    <a href="calendar.html" class="tab">Calendar</a>
+    <a href="notes.html" class="tab active">Notes</a>
+  </div>
+
+  <div class="mainContent">
+    <div id="tools">
+      <button class="tool-btn" data-color="black">🖊 Pen</button>
+      <button class="tool-btn" data-color="pink">💗 Pink</button>
+      <button class="tool-btn" data-color="yellow">💛 Yellow</button>
+    </div>
+
+    <div id="stickerPanel">
+      <div id="stickerPages">
+        <span class="sticker-item">🎀</span>
+        <span class="sticker-item">💌</span>
+        <span class="sticker-item">👾</span>
+        <span class="sticker-item">✔️</span>
+      </div>
+    </div>
+
+    <div id="stickerCanvas" contenteditable="true"></div>
+
+    <div class="note-section">
+      <h3>Notebook Page <span id="pageNumber">1</span></h3>
+      <textarea id="noteArea" placeholder="Start typing your notes..."></textarea>
+
+      <div id="pageControls">
+        <button onclick="flipPage(-1)">◀ Prev</button>
+        <button onclick="flipPage(1)">Next ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="trashBin">🗑️</div>
+
+  <script>
+    // Page flipping logic
+    let noteIndex = 0;
+    const noteArea = document.getElementById("noteArea");
+    const pageNumber = document.getElementById("pageNumber");
+
+    function saveNote() {
+      localStorage.setItem("notes-page-" + noteIndex, noteArea.value);
+    }
+
+    function loadNote() {
+      noteArea.value = localStorage.getItem("notes-page-" + noteIndex) || "";
+      pageNumber.textContent = noteIndex + 1;
+    }
+
+    function flipPage(dir) {
+      saveNote();
+      noteIndex += dir;
+      if (noteIndex < 0) noteIndex = 0;
+      loadNote();
+    }
+
+    noteArea.addEventListener("input", saveNote);
+    loadNote();
+
+    // Color tools
+    document.querySelectorAll(".tool-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.execCommand("foreColor", false, btn.dataset.color);
+      });
+    });
+
+    // Stickers
+    document.querySelectorAll(".sticker-item").forEach(item => {
+      item.addEventListener("click", () => addSticker(item.textContent));
+    });
+
+    const canvas = document.getElementById("stickerCanvas");
+
+    function addSticker(emoji) {
+      const el = document.createElement("div");
+      el.className = "draggable-sticker";
+      el.textContent = emoji;
+      el.style.left = "100px";
+      el.style.top = "100px";
+
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      el.addEventListener("mousedown", e => {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+      });
+
+      window.addEventListener("mousemove", e => {
+        if (isDragging) {
+          let x = e.clientX - canvas.getBoundingClientRect().left - offsetX;
+          let y = e.clientY - canvas.getBoundingClientRect().top - offsetY;
+          el.style.left = `${x}px`;
+          el.style.top = `${y}px`;
+
+          const trash = document.getElementById("trashBin").getBoundingClientRect();
+          const box = el.getBoundingClientRect();
+          if (
+            box.left < trash.right &&
+            box.right > trash.left &&
+            box.top < trash.bottom &&
+            box.bottom > trash.top
+          ) {
+            el.remove();
+          }
+        }
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
+
+      canvas.appendChild(el);
+    }
+  </script>
+</body>
+</html>

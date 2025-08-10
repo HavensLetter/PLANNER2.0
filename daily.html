@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Planner – Daily</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #fffaf0;
+      color: #4b3b00;
+      margin: 20px;
+    }
+
+    #logo {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    #plannerSidebar {
+      display: flex;
+      justify-content: space-around;
+      background-color: #fff8dc;
+      border: 2px solid #b68634;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      padding: 10px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .tab {
+      font-weight: bold;
+      color: #4b3b00;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background-color: #fef3cf;
+      transition: 0.2s ease-in-out;
+    }
+
+    .tab:hover {
+      background-color: #d4af37;
+      color: white;
+    }
+
+    .tab.active {
+      background-color: #b68634;
+      color: white;
+      pointer-events: none;
+    }
+
+    #tools {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .tool-btn {
+      background-color: #fef3cf;
+      border: 2px solid #b68634;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tool-btn.active {
+      background-color: #d4af37;
+      color: white;
+    }
+
+    #trashBin {
+      font-size: 24px;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ffcce6;
+      border: 2px solid #ff99cc;
+      border-radius: 16px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 3px 3px 8px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    #stickerPanel {
+      margin-bottom: 15px;
+      background: #fdf6e3;
+      padding: 12px;
+      border: 2px solid #d4af37;
+      border-radius: 10px;
+      max-width: 400px;
+    }
+
+    #stickerPages {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: start;
+    }
+
+    .sticker-item {
+      font-size: 24px;
+      padding: 6px;
+      background: #fff8dc;
+      border-radius: 8px;
+      cursor: grab;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+
+    #stickerCanvas {
+      position: relative;
+      height: 300px;
+      border: 2px dashed #b68634;
+      background: #fffef2;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .draggable-sticker {
+      position: absolute;
+      font-size: 24px;
+      cursor: move;
+      user-select: none;
+    }
+
+    .section {
+      background: #fff8dc;
+      border: 2px solid #b68634;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .section h3 {
+      margin-top: 0;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      border: 1px solid #d4af37;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 14px;
+      background: #fffdf5;
+      color: #4b3b00;
+    }
+  .teddy-logo {
+  height: 32px;  /* Adjust size as needed */
+  width: auto;
+  vertical-align: middle;
+}
+</style> 
+</head>
+<body>
+
+<div id="logo">
+</div>
+
+  <div id="plannerSidebar">
+    <a href="daily.html" class="tab active">Daily</a>
+    <a href="weekly.html" class="tab">Weekly</a>
+    <a href="calendar.html" class="tab">Calendar</a>
+    <a href="notes.html" class="tab">Notes</a>
+  </div>
+
+  <div id="tools">
+    <button class="tool-btn" data-color="black">🖊 Pen</button>
+    <button class="tool-btn" data-color="pink">💗 Pink</button>
+    <button class="tool-btn" data-color="yellow">💛 Yellow</button>
+  </div>
+
+  <div id="stickerPanel">
+    <div id="stickerPages">
+      <span class="sticker-item">🎀</span>
+      <span class="sticker-item">💌</span>
+      <span class="sticker-item">👾</span>
+      <span class="sticker-item">✔️</span>
+    </div>
+  </div>
+
+  <div id="stickerCanvas" contenteditable="true"></div>
+
+  <div class="section">
+    <h3>🌅 Morning</h3>
+    <textarea data-time="morning"></textarea>
+  </div>
+
+  <div class="section">
+    <h3>🌤 Afternoon</h3>
+    <textarea data-time="afternoon"></textarea>
+  </div>
+
+  <div class="section">
+    <h3>🌙 Evening</h3>
+    <textarea data-time="evening"></textarea>
+  </div>
+
+  <div id="trashBin">🗑️</div>
+
+  <script>
+    // Color tools
+    document.querySelectorAll(".tool-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.execCommand("foreColor", false, btn.dataset.color);
+      });
+    });
+
+    // Stickers
+    document.querySelectorAll(".sticker-item").forEach(item => {
+      item.addEventListener("click", () => addSticker(item.textContent));
+    });
+
+    const canvas = document.getElementById("stickerCanvas");
+
+    function addSticker(emoji) {
+      const el = document.createElement("div");
+      el.className = "draggable-sticker";
+      el.textContent = emoji;
+      el.style.left = "100px";
+      el.style.top = "100px";
+
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      el.addEventListener("mousedown", e => {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+      });
+
+      window.addEventListener("mousemove", e => {
+        if (isDragging) {
+          let x = e.clientX - canvas.getBoundingClientRect().left - offsetX;
+          let y = e.clientY - canvas.getBoundingClientRect().top - offsetY;
+          el.style.left = `${x}px`;
+          el.style.top = `${y}px`;
+
+          const trash = document.getElementById("trashBin").getBoundingClientRect();
+          const box = el.getBoundingClientRect();
+          if (
+            box.left < trash.right &&
+            box.right > trash.left &&
+            box.top < trash.bottom &&
+            box.bottom > trash.top
+          ) {
+            el.remove();
+          }
+        }
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
+
+      canvas.appendChild(el);
+    }
+
+    // Save + Load Textareas
+    document.querySelectorAll("textarea").forEach(area => {
+      const key = "daily-" + area.dataset.time;
+      area.value = localStorage.getItem(key) || "";
+      area.addEventListener("input", () => localStorage.setItem(key, area.value));
+    });
+  </script>
+</body>
+</html>

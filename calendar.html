@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Planner – Calendar</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #fffaf0;
+      color: #4b3b00;
+      display: flex;
+    }
+
+    #plannerSidebar {
+      width: 120px;
+      background: #fff8dc;
+      border-right: 2px solid #b68634;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+    }
+
+    .teddy-logo {
+      width: 32px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      margin: 10px 0;
+      padding: 10px 5px;
+      background-color: #fef3cf;
+      border: 2px solid #d4af37;
+      border-radius: 12px;
+      font-weight: bold;
+      color: #4b3b00;
+      text-decoration: none;
+      transition: 0.3s ease;
+    }
+
+    .tab:hover {
+      background-color: #d4af37;
+      color: white;
+    }
+
+    .tab.active {
+      background-color: #b68634;
+      color: white;
+      pointer-events: none;
+    }
+
+    .mainContent {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .calendar-header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 10px;
+    }
+
+    .calendar-nav button {
+      background-color: #fef3cf;
+      border: 2px solid #b68634;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #4b3b00;
+    }
+
+    .calendar-nav button:hover {
+      background-color: #d4af37;
+      color: white;
+    }
+
+    .week-labels {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      font-weight: bold;
+      text-align: center;
+      margin-top: 10px;
+      color: #b68634;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .day-cell {
+      height: 80px;
+      border: 2px solid #d4af37;
+      border-radius: 8px;
+      background: #fffef5;
+      text-align: center;
+      padding: 6px;
+      font-weight: bold;
+    }
+
+    .day-cell.inactive {
+      background-color: #f4e8d1;
+      color: #b6a46a;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="plannerSidebar">
+    <img src="../assets/teddy.png" alt="Teddy Bear Logo" class="teddy-logo"/>
+    <a href="daily.html" class="tab">Daily</a>
+    <a href="weekly.html" class="tab">Weekly</a>
+    <a href="calendar.html" class="tab active">Calendar</a>
+    <a href="notes.html" class="tab">Notes</a>
+  </div>
+
+  <div class="mainContent">
+    <div class="calendar-header">
+      <div class="calendar-nav">
+        <button onclick="changeMonth(-1)">⟵ Prev</button>
+        <button onclick="changeMonth(1)">Next ⟶</button>
+      </div>
+      <h1 id="monthYear">Month Year</h1>
+    </div>
+
+    <div class="week-labels">
+      <div>Sun</div><div>Mon</div><div>Tue</div>
+      <div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+    </div>
+
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </div>
+
+  <script>
+    let currentDate = new Date();
+
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const prevMonthDays = new Date(year, month, 0).getDate();
+
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+
+      document.getElementById("monthYear").textContent = `${monthNames[month]} ${year}`;
+
+      const calendarGrid = document.getElementById("calendarGrid");
+      calendarGrid.innerHTML = "";
+
+      // Fill previous month's tail
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const cell = document.createElement("div");
+        cell.className = "day-cell inactive";
+        cell.textContent = prevMonthDays - i;
+        calendarGrid.appendChild(cell);
+      }
+
+      // Fill current month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
+        cell.textContent = d;
+        calendarGrid.appendChild(cell);
+      }
+
+      // Fill next month's head
+      const totalCells = firstDay + daysInMonth;
+      const nextDays = 7 - (totalCells % 7);
+      if (nextDays < 7) {
+        for (let i = 1; i <= nextDays; i++) {
+          const cell = document.createElement("div");
+          cell.className = "day-cell inactive";
+          cell.textContent = i;
+          calendarGrid.appendChild(cell);
+        }
+      }
+    }
+
+    function changeMonth(offset) {
+      currentDate.setMonth(currentDate.getMonth() + offset);
+      renderCalendar();
+    }
+
+    renderCalendar();
+  </script>
+</body>
+</html>

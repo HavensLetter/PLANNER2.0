@@ -1,4 +1,4 @@
-(https://studious-space-robot-7vx4j4rqqqg9crx5p-8000.app.github.dev)
+https://studious-space-robot-7vx4j4rqqqg9crx5p-8000.app.github.dev
 
 Planner 2.0 is a beautifully designed, interactive digital planner built with HTML, CSS, and JavaScript. Featuring a warm, inviting strawberry shortcake-inspired theme, this planner helps you organize your day, week, and year with style and ease — all directly in your browser.
 
